@@ -19,7 +19,7 @@ term_filter = st.sidebar.selectbox("Select Term", ['All'] + list(filtered_udash[
 if term_filter != 'All':
     filtered_udash = filtered_udash[filtered_udash['Term'] == term_filter]
 else:
-    filtered_udash = udash
+    filtered_udash = filtered_udash
 
 # KPIs
 st.header("Key Performance Indicators")
