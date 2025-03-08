@@ -5,7 +5,7 @@ import pandas as pd
 udash = pd.read_csv('university_student_dashboard_data.csv')
 
 # Title
-st.title("University Student Admissions Dashboard")
+st.title("🧑‍🎓👩‍🎓 University Student Admissions Dashboard")
 
 # Sidebar Filter
 st.sidebar.header("Filters")
@@ -14,6 +14,27 @@ if year_filter != 'All':
     filtered_udash = udash[udash['Year'] == year_filter]
 else:
     filtered_udash = udash
+
+term_filter = st.sidebar.selectbox("Select Term", ['All'] + list(filtered_udash['Term'].unique()))
+if term_filter != 'All':
+    filtered_udash = filtered_udash[filtered_udash['Term'] == term_filter]
+else:
+    filtered_udash = filtered_udash
+
+department_filter = st.sidebar.selectbox("Select Department", ['All'] + list(filtered_udash['Department'].unique()))
+if department_filter != 'All':
+    filtered_udash = filtered_udash[filtered_udash['Department'] == department_filter]
+    filtered_udash = filtered_udash.groupby('Term').agg({
+    'Applications': 'sum',
+    'Admitted': 'sum',
+    'Enrolled': 'sum'
+}).reset_index()
+else:
+    filtered_udash = filtered_udash.groupby('Term').agg({
+    'Applications': 'sum',
+    'Admitted': 'sum',
+    'Enrolled': 'sum'
+}).reset_index()
 
 # KPIs
 st.header("Key Performance Indicators")
