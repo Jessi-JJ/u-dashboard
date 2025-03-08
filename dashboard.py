@@ -18,69 +18,174 @@ st.image("SUNY-Poly-horizontal-logo.png", width=250)
 # Title
 st.title("Student Admissions Dashboard")
 
-# Sidebar Filter
-st.sidebar.header("Filters")
-year_filter = st.sidebar.selectbox("Select Year", ['All'] + sorted(udash['Year'].unique().tolist()))
-if year_filter != 'All':
-    filtered_udash = udash[udash['Year'] == year_filter]
-else:
-    filtered_udash = udash.copy()
-
-term_filter = st.sidebar.selectbox("Select Term", ['All'] + sorted(filtered_udash['Term'].unique().tolist()))
-if term_filter != 'All':
-    filtered_udash = filtered_udash[filtered_udash['Term'] == term_filter]
-
-# Create a combined column
-filtered_udash['Year_Term'] = filtered_udash['Year'].astype(str) + " " + filtered_udash['Term']
-
-# Sort filtered data
-filtered_udash = filtered_udash.sort_values(by=["Year", "Term"])
-
 # KPIs
 st.header("Key Indicators")
 
 # Group by Term
-for term, group in filtered_udash.groupby("Term"):
+for term, group in udash.groupby("Term"):
     st.header(f"Term: {term}")
     col1, col2, col3 = st.columns(3)
     col1.metric("Total Applications", f"{group['Applications'].sum():,}")
     col2.metric("Total Admitted", f"{group['Admitted'].sum():,}")
     col3.metric("Total Enrolled", f"{group['Enrolled'].sum():,}")
 
-# Create a line chart for Retention Rate and Student Satisfaction
-fig1 = px.line(filtered_udash, 
-            x="Year_Term", 
-            y="Retention_Rate",
-            title="Retention Rate Trends", 
-            labels={
-            "Year_Term": "Term by Year",
-            "Retention_Rate": "Retention Rate (%)"
-    })
+# Sidebar Filter
+year_options = sorted(udash['Year'].unique())
+term_options = sorted(udash['Term'].unique())
 
-fig2 = px.line(filtered_udash,
-            x="Year_Term", 
-            y="Student_Satisfaction", 
-            title="Student Satisfaction Trends",
-            labels={
-            "Year_Term": "Term by Year",
-            "Student_Satisfaction": "Student Satisfaction (%)"
-    })
+selected_year = st.sidebar.selectbox("Select Year", ["All"] + year_options)
+selected_term = st.sidebar.selectbox("Select Term", ["All"] + term_options)
 
-# Arrange the plots in a grid layout
-col1, col2 = st.columns(2)  # Create 2 columns
+# Create filtered df
+def filter_data(df, year, term):
+    """Return a subset of the data based on the chosen year and term."""
+    temp = df.copy()
+    if year != "All":
+        temp = temp[temp['Year'] <= year]  # 'Up to that year'
+    if term != "All":
+        temp = temp[temp['Term'] == term]
+    return temp
 
-with col1:
-    st.plotly_chart(fig1, use_container_width=True)  # First plot in first column
+def group_by_year(df):
+    """Group data by Year, aggregating Retention_Rate and Student_Satisfaction"""
+    return df.groupby('Year', as_index=False)[['Retention_Rate', 'Student_Satisfaction']].mean()
 
-with col2:
-    st.plotly_chart(fig2, use_container_width=True)  # Second plot in second column
+def group_by_term(df, term_value):
+    """Filter by a specific term, then group by Year"""
+    temp = df[df['Term'] == term_value]
+    return group_by_year(temp)
+
+# Logic and Plotting by selection
+if selected_year == "All" and selected_term == "All":
+    st.subheader("All Years, All Terms")
+
+    # Retention & Student Satisfaction year over year (all terms combined)
+    df_all = group_by_year(udash)
+    fig_all = px.line(
+        df_all,
+        x='Year',
+        y=['Retention_Rate', 'Student_Satisfaction'],
+        title="All Terms (Year over Year)",
+        labels={
+        "Retention_Rate": "Retention Rate",
+        "Student_Satisfaction": "Student Satisfaction Rate"
+        }
+    )
+    fig_all.update_yaxes(title_text="Rate (%)")
+    st.plotly_chart(fig_all)
+
+
+    # Fall term year over year
+    df_fall = group_by_term(udash, 'Fall')
+    fig_fall = px.line(
+            df_fall,
+            x='Year',
+            y=['Retention_Rate', 'Student_Satisfaction'],
+            title="Fall Term (Year over Year)",
+            labels={"Retention_Rate": "Retention Rate",
+            "Student_Satisfaction": "Student Satisfaction Rate"
+            }
+        )
+    fig_fall.update_yaxes(title_text="Rate (%)")
+    st.plotly_chart(fig_fall, use_container_width=True)
+
+
+    # Spring term year over year
+    df_spring = group_by_term(udash, 'Spring')
+    fig_spring = px.line(
+            df_spring,
+            x='Year',
+            y=['Retention_Rate', 'Student_Satisfaction'],
+            title="Spring Term (Year over Year)",
+            labels={"Retention_Rate": "Retention Rate",
+            "Student_Satisfaction": "Student Satisfaction Rate"
+            }
+        )
+    fig_spring.update_yaxes(title_text="Rate (%)")
+    st.plotly_chart(fig_spring, use_container_width=True)
+
+elif selected_year != "All" and selected_term == "All":
+    st.subheader(f"Up to Year {selected_year}, All Terms")
+
+    # Filter data up to selected_year
+    df_filtered = udash[udash['Year'] <= selected_year]
+
+    # (a) Fall term YOY up to that year (bar chart)
+    df_fall = group_by_term(df_filtered, 'Fall')
+    fig_fall = px.bar(
+            df_fall,
+            x='Year',
+            y=['Retention_Rate', 'Student_Satisfaction'],
+            title=f"Fall Term up to {selected_year}",
+            barmode='group',
+            labels={"Retention_Rate": "Retention Rate",
+            "Student_Satisfaction": "Student Satisfaction Rate"
+            }
+        )
+    fig_fall.update_yaxes(title_text="Rate (%)")
+    st.plotly_chart(fig_fall)
+
+    # (b) Spring term YOY up to that year (bar chart)
+    df_spring = group_by_term(df_filtered, 'Spring')
+    fig_spring = px.bar(
+            df_spring,
+            x='Year',
+            y=['Retention_Rate', 'Student_Satisfaction'],
+            title=f"Spring Term up to {selected_year}",
+            barmode='group',
+            labels={"Retention_Rate": "Retention Rate",
+            "Student_Satisfaction": "Student Satisfaction Rate"
+            }
+        )
+    fig_spring.update_yaxes(title_text="Rate (%)")
+    st.plotly_chart(fig_spring)
+
+elif selected_year != "All" and selected_term != "All":
+    st.subheader(f"Up to Year {selected_year}, {selected_term} Term Only")
+
+    # Filter data up to the selected year AND the specific term
+    df_filtered = filter_data(udash, selected_year, selected_term)
+
+    # px.bar for that term YOY up to that year
+    df_grouped = group_by_year(df_filtered)
+    fig_term = px.bar(
+        df_grouped,
+        x='Year',
+        y=['Retention_Rate', 'Student_Satisfaction'],
+        title=f"{selected_term} Term up to Year {selected_year}",
+        barmode='group',
+        labels={"Retention_Rate": "Retention Rate",
+        "Student_Satisfaction": "Student Satisfaction Rate"
+        }
+    )
+    fig_term.update_yaxes(title_text="Rate (%)")
+    st.plotly_chart(fig_term)
+
+elif selected_year == "All" and selected_term != "All":
+    st.subheader(f"All Years, {selected_term} Term")
+
+    # Only filter by the selected term (all years)
+    df_filtered = udash[udash['Term'] == selected_term]
+
+    df_grouped = group_by_year(df_filtered)
+    fig_term = px.line(
+        df_grouped,
+        x='Year',
+        y=['Retention_Rate', 'Student_Satisfaction'],
+        title=f"{selected_term} Term (All Years)",
+        labels={"Retention_Rate": "Retention Rate",
+        "Student_Satisfaction": "Student Satisfaction Rate"
+        }
+    )
+    fig_term.update_yaxes(title_text="Rate (%)")
+    st.plotly_chart(fig_term)
 
 
 # Aggregate Enrollment by Department
-total_engineering = filtered_udash['Engineering_Enrolled'].sum()
-total_business    = filtered_udash['Business_Enrolled'].sum()
-total_arts        = filtered_udash['Arts_Enrolled'].sum()
-total_science     = filtered_udash['Science_Enrolled'].sum()
+total_engineering = udash['Engineering_Enrolled'].sum()
+total_business    = udash['Business_Enrolled'].sum()
+total_arts        = udash['Arts_Enrolled'].sum()
+total_science     = udash['Science_Enrolled'].sum()
 
 dept_df = pd.DataFrame({
     'Department': ['Engineering', 'Business', 'Arts', 'Science'],
