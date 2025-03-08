@@ -11,7 +11,7 @@ udash['Retention_Rate'] = udash['Retention_Rate']/100
 udash['Student_Satisfaction'] = udash['Student_Satisfaction']/100
 
 #Logo
-st.set_page_config(layout="wide", page_icon="SUNY-Poly-seal-logo.png")
+st.set_page_config(layout="wide", page_icon="SUNY-Poly-seal-logo.png", width=16)
 st.image("SUNY-Poly-horizontal-logo.png", width=250)
 
 # Title
