@@ -37,7 +37,7 @@ filtered_udash['Year_Term'] = filtered_udash['Year'].astype(str) + " " + filtere
 filtered_udash = filtered_udash.sort_values(by=["Year", "Term"])
 
 # KPIs
-st.header("Key Performance Indicators")
+st.header("Key Indicators")
 
 # Group by Term
 for term, group in filtered_udash.groupby("Term"):
@@ -60,7 +60,7 @@ fig1 = px.line(filtered_udash,
 fig2 = px.line(filtered_udash,
             x="Year_Term", 
             y="Student_Satisfaction", 
-            title="Student Satisfaction",
+            title="Student Satisfaction Trends",
             labels={
             "Year_Term": "Term by Year",
             "Student_Satisfaction": "Student Satisfaction (%)"
