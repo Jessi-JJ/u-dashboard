@@ -10,9 +10,8 @@ udash.columns = (udash.columns.str.replace(r'[^\w\s]', '', regex=True)
 udash['Retention_Rate'] = udash['Retention_Rate']/100
 udash['Student_Satisfaction'] = udash['Student_Satisfaction']/100
 
-
 #Logo
-st.set_page_config(page_icon="SUNY-Poly-seal-logo.png")
+st.set_page_config(layout="wide", page_icon="SUNY-Poly-seal-logo.png")
 st.image("SUNY-Poly-horizontal-logo.png", width=250)
 
 # Title
@@ -33,7 +32,7 @@ if selected_year != "All":
     udash_kpi = udash_kpi[udash_kpi['Year'] == selected_year]
     header_year = f"{selected_year}"
 else:
-    filtered_udash = udash
+    udash_kpi = udash
     header_year = "All Years"
 
 # Group by Term
@@ -44,6 +43,74 @@ for term, group in udash_kpi.groupby("Term"):
     col2.metric("Total Admitted", f"{group['Admitted'].sum():,}")
     col3.metric("Total Enrolled", f"{group['Enrolled'].sum():,}")
 
+# Enrollment KPIs
+st.header("Student Enrollment")
+
+col1, col2 = st.columns((2))
+
+if selected_year != "All":
+    # Only include rows where Year is less than or equal to the selected year
+    enrollment_data = udash[udash['Year'] <= selected_year]
+else:
+    enrollment_data = udash.copy()
+
+# Group by Year and sum up the enrollments
+enrollment_yoy = enrollment_data.groupby('Year', as_index=False)['Enrolled'].sum()
+
+with col1: 
+# Create the bar chart
+    fig_enrollment = px.bar(
+        enrollment_yoy,
+        x='Year',
+        y='Enrolled',
+        title="Student Enrollment Year-over-Year",
+        labels={"Enrolled": "Total Enrolled"}
+    )
+    fig_enrollment.update_xaxes(tickmode='linear', dtick=1)
+    st.plotly_chart(fig_enrollment, use_container_width=True)
+
+# Enrollment by Department
+udash_filtered = udash.copy()
+
+if selected_year != "All":
+    udash_filtered = udash_filtered[udash_filtered['Year'] == selected_year]
+
+if selected_term != "All":
+    udash_filtered = udash_filtered[udash_filtered['Term'] == selected_term]
+
+# Aggregate Enrollment by Department
+total_engineering = udash_filtered['Engineering_Enrolled'].sum()
+total_business    = udash_filtered['Business_Enrolled'].sum()
+total_arts        = udash_filtered['Arts_Enrolled'].sum()
+total_science     = udash_filtered['Science_Enrolled'].sum()
+
+dept_df = pd.DataFrame({
+    'Department': ['Engineering', 'Business', 'Arts', 'Science'],
+    'Enrolled':   [
+        total_engineering,
+        total_business,
+        total_arts,
+        total_science
+    ]
+})
+
+with col2: 
+# Donut Chart of Enrollment by Department
+    dept_fig = px.pie(
+        dept_df,
+        values='Enrolled',
+        names='Department',
+        title='Enrollment by Department',
+        hole=0.4  
+    )
+
+    dept_fig.update_traces(textposition='inside', textinfo='percent+label')
+
+    st.plotly_chart(dept_fig, use_container_width=True)
+
+
+# Retention KPIs
+st.header("Student Retention")
 
 # Create filtered df for plots
 def filter_data(df, year, term):
@@ -64,8 +131,6 @@ def group_by_term(df, term_value):
     temp = df[df['Term'] == term_value]
     return group_by_year(temp)
 
-# More KPIs
-st.header("Student Retention & Enrollment")
 
 # Logic and Plotting by selection
 if selected_year == "All" and selected_term == "All":
@@ -192,40 +257,4 @@ elif selected_year == "All" and selected_term != "All":
     fig_term.update_yaxes(title_text="Rate (%)")
     st.plotly_chart(fig_term)
 
-# Enrollment by Department
-udash_filtered = udash.copy()
 
-if selected_year != "All":
-    udash_filtered = udash_filtered[udash_filtered['Year'] == selected_year]
-
-if selected_term != "All":
-    udash_filtered = udash_filtered[udash_filtered['Term'] == selected_term]
-
-# Aggregate Enrollment by Department
-total_engineering = udash_filtered['Engineering_Enrolled'].sum()
-total_business    = udash_filtered['Business_Enrolled'].sum()
-total_arts        = udash_filtered['Arts_Enrolled'].sum()
-total_science     = udash_filtered['Science_Enrolled'].sum()
-
-dept_df = pd.DataFrame({
-    'Department': ['Engineering', 'Business', 'Arts', 'Science'],
-    'Enrolled':   [
-        total_engineering,
-        total_business,
-        total_arts,
-        total_science
-    ]
-})
-
-# Donut Chart of Enrollment by Department
-fig = px.pie(
-    dept_df,
-    values='Enrolled',
-    names='Department',
-    title='Enrollment by Department',
-    hole=0.4  
-)
-
-fig.update_traces(textposition='inside', textinfo='percent+label')
-
-st.plotly_chart(fig)
