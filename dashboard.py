@@ -19,22 +19,13 @@ term_filter = st.sidebar.selectbox("Select Term", ['All'] + list(filtered_udash[
 if term_filter != 'All':
     filtered_udash = filtered_udash[filtered_udash['Term'] == term_filter]
 else:
-    filtered_udash = filtered_udash
+    filtered_udash = udash
 
 department_filter = st.sidebar.selectbox("Select Department", ['All'] + list(filtered_udash['Department'].unique()))
 if department_filter != 'All':
     filtered_udash = filtered_udash[filtered_udash['Department'] == department_filter]
-    filtered_udash = filtered_udash.groupby('Term').agg({
-    'Applications': 'sum',
-    'Admitted': 'sum',
-    'Enrolled': 'sum'
-}).reset_index()
 else:
-    filtered_udash = filtered_udash.groupby('Term').agg({
-    'Applications': 'sum',
-    'Admitted': 'sum',
-    'Enrolled': 'sum'
-}).reset_index()
+    filtered_udash = udash
 
 # KPIs
 st.header("Key Performance Indicators")
