@@ -21,12 +21,6 @@ if term_filter != 'All':
 else:
     filtered_udash = udash
 
-department_filter = st.sidebar.selectbox("Select Department", ['All'] + list(filtered_udash['Department'].unique()))
-if department_filter != 'All':
-    filtered_udash = filtered_udash[filtered_udash['Department'] == department_filter]
-else:
-    filtered_udash = udash
-
 # KPIs
 st.header("Key Performance Indicators")
 
