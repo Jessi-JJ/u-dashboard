@@ -18,23 +18,32 @@ st.image("SUNY-Poly-horizontal-logo.png", width=250)
 # Title
 st.title("Student Admissions Dashboard")
 
-# KPIs
-st.header("Key Indicators")
-
-# Group by Term
-for term, group in udash.groupby("Term"):
-    st.header(f"All Years: {term}")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Applications", f"{group['Applications'].sum():,}")
-    col2.metric("Total Admitted", f"{group['Admitted'].sum():,}")
-    col3.metric("Total Enrolled", f"{group['Enrolled'].sum():,}")
-
 # Sidebar Filter
 year_options = sorted(udash['Year'].unique())
 term_options = sorted(udash['Term'].unique())
 
 selected_year = st.sidebar.selectbox("Select Year", ["All"] + year_options)
 selected_term = st.sidebar.selectbox("Select Term", ["All"] + term_options)
+
+# KPIs
+st.header("Key Indicators")
+
+udash_kpi = udash.copy()
+if selected_year != "All":
+    udash_kpi = udash_kpi[udash_kpi['Year'] == selected_year]
+    header_year = f"{selected_year}"
+else:
+    filtered_udash = udash
+    header_year = "All Years"
+
+# Group by Term
+for term, group in udash_kpi.groupby("Term"):
+    st.header(f"{term} {header_year}")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Applications", f"{group['Applications'].sum():,}")
+    col2.metric("Total Admitted", f"{group['Admitted'].sum():,}")
+    col3.metric("Total Enrolled", f"{group['Enrolled'].sum():,}")
+
 
 # Create filtered df for plots
 def filter_data(df, year, term):
@@ -56,13 +65,13 @@ def group_by_term(df, term_value):
     return group_by_year(temp)
 
 # More KPIs
-st.header("Student Enrollment & Retention")
+st.header("Student Retention & Enrollment")
 
 # Logic and Plotting by selection
 if selected_year == "All" and selected_term == "All":
     st.subheader("All Years, All Terms")
 
-    # Retention & Student Satisfaction year over year (all terms combined)
+    # Retention & Student Satisfaction YoY (all terms combined)
     df_all = group_by_year(udash)
     fig_all = px.line(
         df_all,
@@ -78,7 +87,7 @@ if selected_year == "All" and selected_term == "All":
     st.plotly_chart(fig_all)
 
 
-    # Fall term year over year
+    # Fall term YoY
     df_fall = group_by_term(udash, 'Fall')
     fig_fall = px.line(
             df_fall,
@@ -93,7 +102,7 @@ if selected_year == "All" and selected_term == "All":
     st.plotly_chart(fig_fall, use_container_width=True)
 
 
-    # Spring term year over year
+    # Spring term YoY
     df_spring = group_by_term(udash, 'Spring')
     fig_spring = px.line(
             df_spring,
@@ -113,7 +122,7 @@ elif selected_year != "All" and selected_term == "All":
     # Filter data up to selected_year
     df_filtered = udash[udash['Year'] <= selected_year]
 
-    # (a) Fall term YOY up to that year (bar chart)
+    # Fall term YOY up to that year (bar chart)
     df_fall = group_by_term(df_filtered, 'Fall')
     fig_fall = px.bar(
             df_fall,
@@ -128,7 +137,7 @@ elif selected_year != "All" and selected_term == "All":
     fig_fall.update_yaxes(title_text="Rate (%)")
     st.plotly_chart(fig_fall)
 
-    # (b) Spring term YOY up to that year (bar chart)
+    # Spring term YOY up to that year (bar chart)
     df_spring = group_by_term(df_filtered, 'Spring')
     fig_spring = px.bar(
             df_spring,
@@ -183,6 +192,7 @@ elif selected_year == "All" and selected_term != "All":
     fig_term.update_yaxes(title_text="Rate (%)")
     st.plotly_chart(fig_term)
 
+# Enrollment by Department
 udash_filtered = udash.copy()
 
 if selected_year != "All":
