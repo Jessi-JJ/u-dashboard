@@ -36,6 +36,9 @@ term_options = sorted(udash['Term'].unique())
 selected_year = st.sidebar.selectbox("Select Year", ["All"] + year_options)
 selected_term = st.sidebar.selectbox("Select Term", ["All"] + term_options)
 
+# Filter by selected years
+filtered_udash = udash[udash['Year'].isin(selected_year)]
+
 # Create filtered df
 def filter_data(df, year, term):
     """Return a subset of the data based on the chosen year and term."""
@@ -182,10 +185,10 @@ elif selected_year == "All" and selected_term != "All":
 
 
 # Aggregate Enrollment by Department
-total_engineering = udash['Engineering_Enrolled'].sum()
-total_business    = udash['Business_Enrolled'].sum()
-total_arts        = udash['Arts_Enrolled'].sum()
-total_science     = udash['Science_Enrolled'].sum()
+total_engineering = filtered_udash['Engineering_Enrolled'].sum()
+total_business    = filtered_udash['Business_Enrolled'].sum()
+total_arts        = filtered_udash['Arts_Enrolled'].sum()
+total_science     = filtered_udash['Science_Enrolled'].sum()
 
 dept_df = pd.DataFrame({
     'Department': ['Engineering', 'Business', 'Arts', 'Science'],
