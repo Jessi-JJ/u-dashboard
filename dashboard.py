@@ -23,7 +23,7 @@ st.header("Key Indicators")
 
 # Group by Term
 for term, group in udash.groupby("Term"):
-    st.header(f"Term: {term}")
+    st.header(f"All Years: {term}")
     col1, col2, col3 = st.columns(3)
     col1.metric("Total Applications", f"{group['Applications'].sum():,}")
     col2.metric("Total Admitted", f"{group['Admitted'].sum():,}")
@@ -56,7 +56,7 @@ def group_by_term(df, term_value):
     return group_by_year(temp)
 
 # More KPIs
-st.header("Student Retention & Satisfaction")
+st.header("Student Enrollment & Retention")
 
 # Logic and Plotting by selection
 if selected_year == "All" and selected_term == "All":
