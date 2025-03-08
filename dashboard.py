@@ -55,6 +55,9 @@ def group_by_term(df, term_value):
     temp = df[df['Term'] == term_value]
     return group_by_year(temp)
 
+# More KPIs
+st.header("Student Retention & Satisfaction")
+
 # Logic and Plotting by selection
 if selected_year == "All" and selected_term == "All":
     st.subheader("All Years, All Terms")
