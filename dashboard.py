@@ -7,11 +7,13 @@ udash = pd.read_csv('university_student_dashboard_data.csv')
 # Title
 st.title("University Student Admissions Dashboard")
 
-# Create a sidebar filter for selecting a year
-selected_year = st.sidebar.slider("Select Year:", int(udash["Year"].min()), int(udash["Year"].max()), int(udash["Year"].min()))
-
-# Filter data based on the selected year
-filtered_udash = udash[udash.Year == selected_year]
+# Sidebar Filter
+st.sidebar.header("Filters")
+year_filter = st.sidebar.selectbox("Select Year", ['All'] + list(udash['Year'].unique()))
+if year_filter != 'All':
+    filtered_udash = udash[udash['Year'] == year_filter]
+else:
+    filtered_udash = udash
 
 # KPIs
 st.header("Key Performance Indicators")
