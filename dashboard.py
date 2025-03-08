@@ -3,51 +3,32 @@ import plotly.express as px
 import pandas as pd
 
 # Data Load and Cleanup
-# Data Load and Cleanup
 udash = pd.read_csv('university_student_dashboard_data.csv')
 udash.columns = (udash.columns.str.replace(r'[^\w\s]', '', regex=True)
                          .str.strip()
                          .str.replace(r' ', '_', regex=True))
 udash['Retention_Rate'] = udash['Retention_Rate']/100
 udash['Student_Satisfaction'] = udash['Student_Satisfaction']/100
-udash.columns = (udash.columns.str.replace(r'[^\w\s]', '', regex=True)
-                         .str.strip()
-                         .str.replace(r' ', '_', regex=True))
-udash['Retention_Rate'] = udash['Retention_Rate']/100
-udash['Student_Satisfaction'] = udash['Student_Satisfaction']/100
+
 
 #Logo
 st.set_page_config(page_icon="SUNY-Poly-seal-logo.png")
 st.image("SUNY-Poly-horizontal-logo.png", width=250)
-#Logo
-st.set_page_config(page_icon="SUNY-Poly-seal-logo.png")
-st.image("SUNY-Poly-horizontal-logo.png", width=250)
 
-# Title
-st.title("Student Admissions Dashboard")
 # Title
 st.title("Student Admissions Dashboard")
 
 # Sidebar Filter
 st.sidebar.header("Filters")
 year_filter = st.sidebar.selectbox("Select Year", ['All'] + sorted(udash['Year'].unique().tolist()))
-year_filter = st.sidebar.selectbox("Select Year", ['All'] + sorted(udash['Year'].unique().tolist()))
 if year_filter != 'All':
     filtered_udash = udash[udash['Year'] == year_filter]
 else:
     filtered_udash = udash.copy()
-    filtered_udash = udash.copy()
 
-term_filter = st.sidebar.selectbox("Select Term", ['All'] + sorted(filtered_udash['Term'].unique().tolist()))
 term_filter = st.sidebar.selectbox("Select Term", ['All'] + sorted(filtered_udash['Term'].unique().tolist()))
 if term_filter != 'All':
     filtered_udash = filtered_udash[filtered_udash['Term'] == term_filter]
-
-# Create a combined column
-filtered_udash['Year_Term'] = filtered_udash['Year'].astype(str) + " " + filtered_udash['Term']
-
-# Sort filtered data
-filtered_udash = filtered_udash.sort_values(by=["Year", "Term"])
 
 # Create a combined column
 filtered_udash['Year_Term'] = filtered_udash['Year'].astype(str) + " " + filtered_udash['Term']
@@ -65,7 +46,6 @@ for term, group in filtered_udash.groupby("Term"):
     col1.metric("Total Applications", f"{group['Applications'].sum():,}")
     col2.metric("Total Admitted", f"{group['Admitted'].sum():,}")
     col3.metric("Total Enrolled", f"{group['Enrolled'].sum():,}")
-
 
 # Create a line chart for Retention Rate and Student Satisfaction
 fig1 = px.line(filtered_udash, 
