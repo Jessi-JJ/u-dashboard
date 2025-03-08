@@ -12,6 +12,5 @@ for term, group in udash.groupby("Term"):
     st.header(f"Term: {term}")
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Applications", f"${group['Applications'].sum():,}")
-    col2.metric("Total Accepted", f"${group['Accepted'].sum():,}")
+    col2.metric("Total Admitted", f"${group['Admitted'].sum():,}")
     col3.metric("Total Enrolled", f"${group['Enrolled'].sum():,}")
-    col4.metric("Acceptance Rate", f"{group['Acceptance_Rate'].mean():.2%}")
