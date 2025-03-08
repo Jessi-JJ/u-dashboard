@@ -36,10 +36,7 @@ term_options = sorted(udash['Term'].unique())
 selected_year = st.sidebar.selectbox("Select Year", ["All"] + year_options)
 selected_term = st.sidebar.selectbox("Select Term", ["All"] + term_options)
 
-# Filter by selected years
-filtered_udash = udash[udash['Year'].isin(selected_year)]
-
-# Create filtered df
+# Create filtered df for plots
 def filter_data(df, year, term):
     """Return a subset of the data based on the chosen year and term."""
     temp = df.copy()
@@ -183,12 +180,19 @@ elif selected_year == "All" and selected_term != "All":
     fig_term.update_yaxes(title_text="Rate (%)")
     st.plotly_chart(fig_term)
 
+udash_filtered = udash.copy()
+
+if selected_year != "All":
+    udash_filtered = udash_filtered[udash_filtered['Year'] == selected_year]
+
+if selected_term != "All":
+    udash_filtered = udash_filtered[udash_filtered['Term'] == selected_term]
 
 # Aggregate Enrollment by Department
-total_engineering = filtered_udash['Engineering_Enrolled'].sum()
-total_business    = filtered_udash['Business_Enrolled'].sum()
-total_arts        = filtered_udash['Arts_Enrolled'].sum()
-total_science     = filtered_udash['Science_Enrolled'].sum()
+total_engineering = udash_filtered['Engineering_Enrolled'].sum()
+total_business    = udash_filtered['Business_Enrolled'].sum()
+total_arts        = udash_filtered['Arts_Enrolled'].sum()
+total_science     = udash_filtered['Science_Enrolled'].sum()
 
 dept_df = pd.DataFrame({
     'Department': ['Engineering', 'Business', 'Arts', 'Science'],
