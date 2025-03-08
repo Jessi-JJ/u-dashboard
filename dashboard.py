@@ -7,8 +7,14 @@ udash = pd.read_csv('university_student_dashboard_data.csv')
 # KPIs
 st.title("University Student Admissions Dashboard")
 
+# Create a sidebar filter for selecting a year
+selected_year = st.sidebar.slider("Select Year:", int(udash["Year"].min()), int(udash["Year"].max()), int(udash["YEar"].min()))
+
+# Filter data based on the selected year
+filtered_udash = udash[udash.year == selected_year]
+
 # Group by Term
-for term, group in udash.groupby("Term"):
+for term, group in filtered_udash.groupby("Term"):
     st.header(f"Term: {term}")
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Applications", f"{group['Applications'].sum():,}")
