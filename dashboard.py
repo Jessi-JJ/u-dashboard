@@ -4,8 +4,13 @@ import pandas as pd
 
 udash = pd.read_csv('university_student_dashboard_data.csv')
 
-# Title
-st.title("🧑‍🎓👩‍🎓 University Student Admissions Dashboard")
+col1, col2 = st.columns([1, 4])  # Adjust column widths as needed
+
+with col1: #Logo
+    st.image("SUNY-Poly-vertical-logo.png", width=80)
+
+with col2: # Title
+    st.title("Student Admissions Dashboard")
 
 # Sidebar Filter
 st.sidebar.header("Filters")
