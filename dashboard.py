@@ -74,3 +74,33 @@ with col1:
 
 with col2:
     st.plotly_chart(fig2, use_container_width=True)  # Second plot in second column
+
+
+# Aggregate Enrollment by Department
+total_engineering = filtered_udash['Engineering_Enrolled'].sum()
+total_business    = filtered_udash['Business_Enrolled'].sum()
+total_arts        = filtered_udash['Arts_Enrolled'].sum()
+total_science     = filtered_udash['Science_Enrolled'].sum()
+
+dept_df = pd.DataFrame({
+    'Department': ['Engineering', 'Business', 'Arts', 'Science'],
+    'Enrolled':   [
+        total_engineering,
+        total_business,
+        total_arts,
+        total_science
+    ]
+})
+
+# Donut Chart of Enrollment by Department
+fig = px.pie(
+    dept_df,
+    values='Enrolled',
+    names='Department',
+    title='Enrollment by Department',
+    hole=0.4  
+)
+
+fig.update_traces(textposition='inside', textinfo='percent+label')
+
+st.plotly_chart(fig)
